@@ -1,0 +1,39 @@
+# ローカル開発環境用
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    environment:
+      RUNSERVER: DEVELOPMENT
+      MYSQL_HOST: mysql
+      MYSQL_PORT: ${MYSQL_INTERNAL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+      MYSQL_USER: ${MYSQL_USER_NAME}
+      MYSQL_PASSWORD: ${MYSQL_USER_PASSWORD}
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./app:/go/src/github.com/muff1225/gorm-gen-sample/app
+      - ./.docker-compose/go-modules:/go/pkg/mod
+    ports:
+      - 8080:8080
+    tty: true
+  mysql:
+      image: mysql:8.2
+      restart: always
+      ports:
+        - ${MYSQL_EXTERNAL_PORT}:${MYSQL_INTERNAL_PORT}
+      environment:
+        MYSQL_DATABASE: ${MYSQL_DB_NAME} # db名
+        MYSQL_USER: ${MYSQL_USER_NAME} # ユーザー名
+        MYSQL_PASSWORD: ${MYSQL_USER_PASSWORD} # パスワード
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # rootユーザーのパスワード
+        TZ: Asia/Tokyo
+      volumes:
+        - ./.docker-compose/mysql:/var/lib/mysql
